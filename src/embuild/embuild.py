@@ -73,9 +73,9 @@ class Repository:
 
 
 def main():
-    vt100logging_init('embuild')
     try:
-        parse_args()
+        args = parse_args()
+        vt100logging_init('embuild', is_verbose())
         check_environment()
         repository = Repository()
         I("DONE")
