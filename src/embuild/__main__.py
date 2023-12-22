@@ -1,1 +1,3 @@
-print("Hello from embuild")
+from .embuild import main
+
+main()

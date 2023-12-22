@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "embuild"
-version = "0.0.2"
+version = "0.0.8"
 authors = [{ name = "Grzegorz Grzęda", email = "grzegorz.grzeda@g2labs.pl" }]
 description = "Embuild is a tool for building embedded projects."
 readme = "README.md"
@@ -14,6 +14,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dependencies = ["vt100logging"]
 
 [project.urls]
 Homepage = "https://github.com/g2labs-grzegorz-grzeda/embuild"
