@@ -4,6 +4,8 @@
   "author": "G2",
   "license": "MIT",
   "libraries": [
-    "cli"
+    "cli",
+    "event-handler",
+    "font"
   ]
 }
