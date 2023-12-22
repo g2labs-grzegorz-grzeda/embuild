@@ -1,0 +1,9 @@
+{
+  "name": "test",
+  "description": "some simple test",
+  "author": "G2",
+  "license": "MIT",
+  "libraries": [
+    "cli"
+  ]
+}
