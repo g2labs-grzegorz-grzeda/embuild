@@ -1,7 +1,7 @@
 from os import getcwd, path, makedirs
 from json import load as json_load
 from shutil import rmtree
-from subprocess import run, PIPE, DEVNULL, STDOUT
+from subprocess import run, DEVNULL
 from argparse import ArgumentParser
 from vt100logging import vt100logging_init, D, I, E
 
@@ -25,8 +25,8 @@ def run_process(cmd: str, cwd: str = getcwd()) -> None:
     """Run a process and return its output."""
     if is_verbose():
         D(f"Running: '{cmd}'")
-    result = run(cmd, cwd=cwd, stdout=PIPE if is_verbose() else DEVNULL,
-                 stderr=STDOUT if is_verbose() else DEVNULL, shell=True)
+    result = run(cmd, cwd=cwd, stdout=None if is_verbose() else DEVNULL,
+                 stderr=None if is_verbose() else DEVNULL, shell=True)
     if result.returncode != 0:
         raise Exception(f"Failed to run: '{cmd}'")
 
@@ -58,8 +58,10 @@ class Repository:
     def __init__(self) -> None:
         self._real_path = path.expanduser(LOCAL_REPOSITORY_PATH)
         if path.exists(self._real_path):
+            D("Updating repository")
             run_process(f'git pull', cwd=self._real_path)
         else:
+            D("First time cloning repository")
             run_process(
                 f'git clone --depth 1 {EMBUILD_REPOSITORY} {self._real_path}')
 
