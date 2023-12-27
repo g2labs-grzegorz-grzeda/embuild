@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 from vt100logging import vt100logging_init, D, I, E
 from traceback import print_stack
 
-EMBUILD_REPOSITORY: str = 'git@github.com:g2labs-grzegorz-grzeda/embuild-repository.git'
+EMBUILD_REPOSITORY: str = 'https://github.com/g2labs-grzegorz-grzeda/embuild-repository.git'
 EMBUILD_REPOSITORY_FILE: str = 'repository.json'
 LOCAL_REPOSITORY_PATH: str = '~/.embuild/repository'
 
@@ -56,9 +56,12 @@ def parse_args():
     parser.add_argument('-v', '--verbose',
                         action='store_true', default=False, help='Verbose output')
     subparsers = parser.add_subparsers(dest='command', required=True)
+    subparsers.add_parser('list', help='List available libraries')
+    create_subparser = subparsers.add_parser('create', help='Create a project')
+    create_subparser.add_argument('destination', help='Destination directory')
     subparsers.add_parser('init', help='Initialize the project')
     add_subparser = subparsers.add_parser('add', help='Add a library')
-    add_subparser.add_argument('library', help='Library name')
+    add_subparser.add_argument('libraries', help='Library name', nargs='+')
     update_subparser = subparsers.add_parser(
         'update', help='Update the project')
     update_subparser.add_argument(
@@ -128,25 +131,65 @@ def store_project_object(project: dict, project_file_path: str = None):
     with open(project_file_full_path, 'w') as f:
         json_dump(project, f, indent=2)
 
+def create_project_file(destination:str=None):
+    if destination is None:
+        destination = getcwd()
+        name=path.basename(destination)
+    name=path.basename(destination)
+    I(f"Creating project '{name}'")
+    project = create_project_object(
+        name,
+        description=input("Project description: "),
+        author=input("Project author: "),
+        license=input("Project license: ")
+    )
+    store_project_object(project,path.join(destination,PROJECT_FILE_NAME))
+
+def perform_create(destination:str):
+    if path.exists(destination):
+        raise Exception("Directory already exists")
+    makedirs(path.join(destination,'source'))
+    create_project_file(destination)
+    name=path.basename(destination)
+    with open(path.join(destination,'CMakeLists.txt'), 'w') as f:
+        f.write(f'''cmake_minimum_required(VERSION 3.22)
+
+project({name})
+add_library(${{PROJECT_NAME}} STATIC)
+
+add_subdirectory(source)
+''')
+    with open(path.join(destination,'source','CMakeLists.txt'), 'w') as f:
+        f.write(f'''target_sources(${{PROJECT_NAME}} PRIVATE {name}.c)
+target_include_directories(${{PROJECT_NAME}} PUBLIC ${{CMAKE_CURRENT_SOURCE_DIR}})
+''')
+    with open(path.join(destination,'source',f'{name}.c'), 'w') as f:
+        f.write(f'''#include "{name}.h"
+''')
+    guard_name = f'{name.upper()}_H'.replace('-','_')
+    with open(path.join(destination,'source',f'{name}.h'), 'w') as f:
+        f.write(f'''#ifndef {guard_name}
+#define {guard_name}
+#ifdef __cplusplus
+extern "C" {{
+#endif // __cplusplus
+
+#ifdef __cplusplus
+}}
+#endif // __cplusplus
+#endif // {guard_name}
+''')
 
 def perform_init():
     if does_main_project_exist():
         raise Exception("Project already exists")
     I("Initializing project")
-    with open(path.join(getcwd(), PROJECT_FILE_NAME), 'w') as f:
-        project = create_project_object(
-            name=input("Project name: "),
-            description=input("Project description: "),
-            author=input("Project author: "),
-            license=input("Project license: ")
-        )
-        store_project_object(project)
+    create_project_file()
 
-
-def perform_add(library: str, repository: Repository):
+def perform_add_library(library: str, repository: Repository):
     I(f"Adding library '{library}'")
     if library not in repository.libraries():
-        raise Exception(f"Library '{library}' does not exist")
+        raise Exception(f"Library '{library}' does not exist exist")
     project = load_project_object()
     if 'libraries' not in project:
         project['libraries'] = [library]
@@ -155,6 +198,18 @@ def perform_add(library: str, repository: Repository):
     else:
         project['libraries'].append(library)
     store_project_object(project)
+
+def perform_add(libraries: list, repository: Repository):
+    for library in libraries:
+        try:
+            perform_add_library(library, repository)
+        except Exception as e:
+            E(e)
+
+def perform_list(repository: Repository):
+    print("Available libraries:")
+    for library in repository.libraries().keys():
+        print(f"\t{library}")
 
 
 class Library:
@@ -255,13 +310,18 @@ def main():
         vt100logging_init('embuild', is_verbose())
         if args.command == 'init':
             perform_init()
+        elif args.command == 'create':
+            perform_create(args.destination)
         else:
             if not does_main_project_exist():
                 raise Exception("Project file does not exist - initialize!")
             check_environment()
             repository = Repository()
-            if args.command == 'add':
-                perform_add(args.library, repository)
+            if args.command == 'list':
+                perform_list(repository)
+            elif args.command == 'add':
+                perform_add(args.libraries, repository)
+                perform_update(repository)
             elif args.command == 'update':
                 perform_update(repository, args.clean)
         I("DONE")

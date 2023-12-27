@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "embuild"
-version = "0.0.12"
+version = "1.0.0"
 authors = [{ name = "Grzegorz Grzęda", email = "grzegorz.grzeda@g2labs.pl" }]
 description = "Embuild is a tool for building embedded projects."
 readme = "README.md"
