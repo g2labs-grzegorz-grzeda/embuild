@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "embuild"
-version = "1.0.0"
+version = "1.0.2"
 authors = [{ name = "Grzegorz Grzęda", email = "grzegorz.grzeda@g2labs.pl" }]
-description = "Embuild is a tool for building embedded projects."
+description = "Embuild is a tool for C/CMake static library management"
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
@@ -14,8 +14,12 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-dependencies = ["vt100logging"]
+dependencies = ["vt100logging>=1.1.0"]
 
 [project.urls]
 Homepage = "https://github.com/g2labs-grzegorz-grzeda/embuild"
 Issues = "https://github.com/g2labs-grzegorz-grzeda/embuild/issues"
+"Library index" = "https://embuild.dev"
+
+[project.scripts]
+embuild = "embuild:embuild_main"
