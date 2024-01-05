@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "embuild"
-version = "1.0.2"
+version = "1.0.3"
 authors = [{ name = "Grzegorz Grzęda", email = "grzegorz.grzeda@g2labs.pl" }]
 description = "Embuild is a tool for C/CMake static library management"
 readme = "README.md"
