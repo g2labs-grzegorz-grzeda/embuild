@@ -48,6 +48,12 @@ This:
 - removes old libraries
 - (re)generates the `CMakeLists.txt` in the subdirectory
 
+### Run scripts
+`python -m embuild run <SCRIPT_NAME> {OPTIONAL PARAMS ...}`
+
+This:
+- runs a script (with optional parameters) defined as a dictionary in `project.json` `scripts` content
+
 ## Library name
 The library has three ways to be named:
 1. `<library-name>` (e.g. `event-handler`) - short name

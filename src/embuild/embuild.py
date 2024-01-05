@@ -66,6 +66,9 @@ def parse_args():
         'update', help='Update the project')
     update_subparser.add_argument(
         '-c', '--clean', help='Perform clean update', action='store_true', default=False)
+    run_subparser = subparsers.add_parser('run', help='Run a script')
+    run_subparser.add_argument(
+        'script', help='Name of the script in project.json["scripts"] with (optional) parameters', nargs='+')
     args = parser.parse_args()
     set_verbosity(args.verbose)
     return args
@@ -330,6 +333,15 @@ def perform_update(repository: Repository, clean: bool = False):
             rmtree(to_be_deleted, ignore_errors=True)
 
 
+def perform_run(script: list):
+    project = load_project_object()
+    if 'scripts' not in project:
+        raise Exception("No scripts defined")
+    if script[0] not in project['scripts']:
+        raise Exception(f"Script '{script[0]}' does not exist")
+    run_process(project['scripts'][script[0]] + ' ' + ' '.join(script[1:]))
+
+
 def main():
     try:
         args = parse_args()
@@ -352,6 +364,8 @@ def main():
                     perform_update(repository)
                 elif args.command == 'update':
                     perform_update(repository, args.clean)
+                elif args.command == 'run':
+                    perform_run(args.script)
         I("DONE")
     except Exception as e:
         E(e)
